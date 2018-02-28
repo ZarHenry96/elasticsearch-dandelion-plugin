@@ -1,0 +1,4 @@
+grant {
+   // reindex opens socket connections using the rest client
+   permission java.net.SocketPermission "api.dandelion.eu:443", "connect,resolve";
+};
