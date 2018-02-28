@@ -11,34 +11,23 @@ import java.io.IOException;
 public class DandelionTokenFilter extends TokenFilter {
 	private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
 	private final OffsetAttribute offsAtt = addAttribute(OffsetAttribute.class);
-	private final LinkedList<String> extraTokens = new LinkedList<String>();
+	private final LinkedList<String> tokens = new LinkedList<String>();
 	private State savedState;
-	private int previousLength = 0;
 
 	public DandelionTokenFilter(TokenStream in){
 		super(in);
 	}
 
 	public final boolean incrementToken() throws IOException {
-		if (!extraTokens.isEmpty()) {
-			return addToken();
+		if (!tokens.isEmpty()) {
+			termAtt.setEmpty().append(tokens.remove());
+			return true;
 	    }
 
 	    if (input.incrementToken()) {
-           	extraTokens.add("AHAHA");
-		   	extraTokens.add("sono");
-		   	extraTokens.add("Enrico");
-        	return addToken();
+
+		   	return true;
 	    }
 	    return false;
 	}
-
-	private final boolean addToken(){
-		String token = extraTokens.remove();
-		offsAtt.setOffset(previousLength,previousLength+token.length());
-		previousLength+=token.length()+1;
-		termAtt.setEmpty().append(token);
-		return true;
-	}
-
 }
