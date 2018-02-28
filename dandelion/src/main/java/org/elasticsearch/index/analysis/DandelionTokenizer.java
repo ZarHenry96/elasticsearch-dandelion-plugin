@@ -42,7 +42,11 @@ public final class DandelionTokenizer extends Tokenizer {
 
     public DandelionTokenizer(String auth_token) {
         super();
-        this.auth_token = auth_token;
+        if(auth_token == null || auth_token.isEmpty()){
+            throw new IllegalArgumentException("No authorization token (auth field) specified!");
+        }else {
+            this.auth_token = auth_token;
+        }
     }
 
     @Override
@@ -68,20 +72,35 @@ public final class DandelionTokenizer extends Tokenizer {
 
         if(index<size) {
             JsonObject entity = (JsonObject) annotations.get(index);
-            String uri = entity.get("uri").getAsString();
-            System.out.println(uri);
-            /*
-            termAtt.setEmpty().append(inputString);
-            typeAtt.setType("stringa");
-            offsetAtt.setOffset(offset,offset+inputString.length());
-            offset += inputString.length();
-            */
-            index++;
+            Integer begin = entity.get("start").getAsInt();
+            if (begin == offset) {
+                Integer end = entity.get("end").getAsInt();
+                String uri = entity.get("uri").getAsString();
+                termAtt.setEmpty().append(inputString.substring(begin, end));
+                offsetAtt.setOffset(begin, end);
+                offset = end;
+                typeAtt.setType(uri);
+                index++;
+                return true;
+            } else if (begin > offset) {
+                termAtt.setEmpty().append(inputString.substring(offset, begin));
+                offsetAtt.setOffset(offset, begin);
+                offset = begin;
+                typeAtt.setType("");
+                return true;
+            } else {
+                throw new IOException("Error in entity offsets management!");
+            }
+        } else if (offset != inputString.length()){
+            Integer end = inputString.length();
+            termAtt.setEmpty().append(inputString.substring(offset, end));
+            offsetAtt.setOffset(offset, end);
+            offset = end;
+            typeAtt.setType("");
             return true;
-        }else{
+        } else {
             return false;
         }
-
     }
 
     private void dandelionApiCall() throws IOException {
