@@ -11,7 +11,7 @@ public class DandelionAnalyzerProvider extends AbstractIndexAnalyzerProvider<Dan
 
     public DandelionAnalyzerProvider(IndexSettings indexSettings, Environment env, String name, Settings settings) {
         super(indexSettings, name, settings);
-        dandelionAnalyzer = new DandelionAnalyzer(settings.get("auth"));
+        dandelionAnalyzer = new DandelionAnalyzer(settings.get("auth"),settings.get("lang"));
     }
 
     @Override

@@ -1,6 +1,8 @@
 package org.elasticsearch.index.analysis;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Arrays;
 
 import org.elasticsearch.SpecialPermission;
 import java.security.AccessController;
@@ -31,7 +33,12 @@ public final class DandelionTokenizer extends Tokenizer {
     private final PositionIncrementAttribute posIncrAtt = addAttribute(PositionIncrementAttribute.class);
     private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
 
+    private final List<String> allowedLanguages = Arrays.asList("auto","de","en","es","fr","it","pt","ru","af",
+        "sq","ar","bn","bg","hr","cs","da","nl","et","fi","el","gu","he","hi","hu","id","ja","kn","ko","lv","lt",
+        "mk","ml","mr","ne","no","pa","fa","pl","ro","sk","sl","sw","sv","tl","ta","te","th","tr","uk","ur","vi");
+
     private String auth_token;
+    private String lang;
 
     private String inputString;
     private JsonArray annotations;
@@ -40,13 +47,22 @@ public final class DandelionTokenizer extends Tokenizer {
     private Integer offset;
 
 
-    public DandelionTokenizer(String auth_token) {
+    public DandelionTokenizer(String auth_token, String lang) {
         super();
+        System.out.println("A");
         if(auth_token == null || auth_token.isEmpty()){
             throw new IllegalArgumentException("No authorization token (auth field) specified!");
         }else {
             this.auth_token = auth_token;
         }
+        if(lang == null || lang.isEmpty()){
+            this.lang = "auto";
+        }else if (allowedLanguages.contains(lang)){
+            this.lang = lang;
+        }else {
+            throw new IllegalArgumentException("Illegal language (lang) parameter!");
+        }
+        System.out.println("B");
     }
 
     @Override
@@ -106,7 +122,7 @@ public final class DandelionTokenizer extends Tokenizer {
     private void dandelionApiCall() throws IOException {
 
         String baseUrl = "https://api.dandelion.eu/datatxt/nex/v1";
-        final String url = baseUrl + "?text=" + URLEncoder.encode(inputString, "utf-8") + "&token=" + auth_token;
+        final String url = baseUrl + "?text=" + URLEncoder.encode(inputString, "utf-8") + "&token=" + auth_token + "&lang=" + lang;
 
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
