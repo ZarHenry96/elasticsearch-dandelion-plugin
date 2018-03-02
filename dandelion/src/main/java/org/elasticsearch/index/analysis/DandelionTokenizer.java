@@ -49,7 +49,6 @@ public final class DandelionTokenizer extends Tokenizer {
 
     public DandelionTokenizer(String auth_token, String lang) {
         super();
-        System.out.println("A");
         if(auth_token == null || auth_token.isEmpty()){
             throw new IllegalArgumentException("No authorization token (auth field) specified!");
         }else {
@@ -62,7 +61,6 @@ public final class DandelionTokenizer extends Tokenizer {
         }else {
             throw new IllegalArgumentException("Illegal language (lang) parameter!");
         }
-        System.out.println("B");
     }
 
     @Override
