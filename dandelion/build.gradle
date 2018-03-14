@@ -3,10 +3,6 @@ esplugin {
   classname 'org.elasticsearch.plugin.analysis.DandelionAnalysisPlugin'
 }
 
-repositories {
-  jcenter()
-}
-
 dependencies {
   compile 'com.google.code.gson:gson:2.8.2'
   testCompile "org.elasticsearch:securemock:1.2"
