@@ -59,7 +59,7 @@ public final class DandelionTokenizer extends Tokenizer {
         }else if (allowedLanguages.contains(lang)){
             this.lang = lang;
         }else {
-            throw new IllegalArgumentException("Illegal language (lang) parameter!");
+            throw new IllegalArgumentException("Illegal language (lang) parameter! Check on dandelion.eu the possible values; if not specified auto will be used.");
         }
     }
 
@@ -134,8 +134,14 @@ public final class DandelionTokenizer extends Tokenizer {
                     connection.setRequestMethod("GET");
                     connection.setRequestProperty("User-Agent", "Mozilla/5.0");
 
-                    int responseCode = connection.getResponseCode();
-                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    Integer responseCode = connection.getResponseCode();
+
+                    BufferedReader in;
+                    if (responseCode.equals(HttpURLConnection.HTTP_OK)){
+                        in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    }else{
+                        in = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                    }
 
                     String inputLine;
                     StringBuffer response = new StringBuffer();
@@ -147,7 +153,18 @@ public final class DandelionTokenizer extends Tokenizer {
                     Gson gson = new Gson();
                     JsonElement element = gson.fromJson(response.toString(), JsonElement.class);
                     JsonObject jsonObject = element.getAsJsonObject();
-                    return jsonObject.getAsJsonArray("annotations");
+
+                    switch (responseCode) {
+                        case HttpURLConnection.HTTP_OK:
+                            return jsonObject.getAsJsonArray("annotations");
+                        case HttpURLConnection.HTTP_UNAUTHORIZED:
+                        case HttpURLConnection.HTTP_FORBIDDEN:
+                            String exMessage = jsonObject.get("message").getAsString() + " , if you have any problem please contact us at sales@spaziodati.eu";
+                            throw new IOException(exMessage);
+                        default:
+                            String message = jsonObject.get("message").getAsString();
+                            throw new IOException(message);
+                    }
                 }
             });
         } catch (PrivilegedActionException e) {

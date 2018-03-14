@@ -18,7 +18,7 @@ public class DandelionAnalysisTests extends ESTestCase {
 
     @Before
     public void setup() throws IOException {
-        Settings settings = Settings.builder().put("auth", "").build();
+        Settings settings = Settings.builder().put("auth", "token").build();
         this.analysis = createTestAnalysis(new Index("test", "_na_"), settings, new DandelionAnalysisPlugin());
 
     }
@@ -33,6 +33,5 @@ public class DandelionAnalysisTests extends ESTestCase {
         Analyzer analyzer = analysis.indexAnalyzers.get("dandelion-a").analyzer();
         MatcherAssert.assertThat(analyzer, instanceOf(DandelionAnalyzer.class));
     }
-
 
 }

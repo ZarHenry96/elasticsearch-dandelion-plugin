@@ -17,7 +17,7 @@ public class HttpsUrlStreamHandler extends URLStreamHandler {
         if(conn != null) {
             return conn;
         } else {
-            throw new IOException("can't connect "+url.getHost());
+            throw new IOException("failed to create URLConnection object for url: "+url.getHost());
         }
     }
 
