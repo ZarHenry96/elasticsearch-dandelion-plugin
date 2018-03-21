@@ -51,7 +51,7 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
         httpUrlConnection = null;
     }
 
-    private void configMockResponse(String text, String auth_token, String lang, Integer responseCode, String data) throws IOException {
+    private void configMockResponse(String text, String auth_token, String lang, int responseCode, String data) throws IOException {
         try{
             AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
                 public Void run() throws IOException {
@@ -90,7 +90,7 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
         String text = "La Gioconda è un quadro.";
         String auth_token = "token";
         String lang = "auto";
-        Integer responseCode = -1;
+        int responseCode = -1;
         String exceptionMessage = "failed to connect to api.dandelion.eu";
 
         configMockResponse(text, auth_token, lang, responseCode, exceptionMessage);
@@ -116,7 +116,7 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
         String text = "La Gioconda è un quadro.";
         String auth_token = "nonexistentToken";
         String lang = "auto";
-        Integer responseCode = 401;
+        int responseCode = 401;
         String errorData = "{\"error\":true,\"status\":401,\"code\":\"error.invalidParameter\",\"message\":\"no such token 'nonexistentToken'\",\"data\":{\"parameter\":\"token\"}}";
         String exceptionMessage = "no such token 'nonexistentToken' , if you have any problem please contact us at sales@spaziodati.eu";
 
@@ -135,7 +135,7 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
         String text = "La Gioconda è un quadro.";
         String auth_token = "token";
         String lang = "auto";
-        Integer responseCode = HttpURLConnection.HTTP_OK;
+        int responseCode = HttpURLConnection.HTTP_OK;
         String responseData = "{\"time\":1,\"annotations\":[{\"start\":3,\"end\":11,\"spot\":\"Gioconda\",\"confidence\":0.907,\"id\":10664,\"title\":\"Gioconda\",\"uri\":\"http://it.wikipedia.org/wiki/Gioconda\",\"label\":\"Gioconda\"},{\"start\":17,\"end\":23,\"spot\":\"quadro\",\"confidence\":0.74,\"id\":3197,\"title\":\"Pittura\",\"uri\":\"http://it.wikipedia.org/wiki/Pittura\",\"label\":\"Pittura\"}],\"lang\":\"it\",\"langConfidence\":1.0,\"timestamp\":\"2018-03-14T12:47:46.572\"}";
         configMockResponse(text,auth_token,lang,responseCode,responseData);
 
@@ -157,7 +157,7 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
         String text = "";
         String auth_token = "token";
         String lang = "auto";
-        Integer responseCode = 400;
+        int responseCode = 400;
         String errorData = "{\"message\":\"Cannot detect language:text is empty or null\",\"code\":\"error.cannotDetectLanguage\",\"data\":{},\"error\":true}";
         String exceptionMessage = "Cannot detect language:text is empty or null";
 
@@ -186,7 +186,7 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
         String text = "Mona Lisa.";
         String auth_token = "token";
         String lang = "en";
-        Integer responseCode = HttpURLConnection.HTTP_OK;
+        int responseCode = HttpURLConnection.HTTP_OK;
         String responseData = "{\"time\":1,\"annotations\":[{\"start\":0,\"end\":9,\"spot\":\"Mona Lisa\",\"confidence\":0.7962,\"id\":70889,\"title\":\"Mona Lisa\",\"uri\":\"http://en.wikipedia.org/wiki/Mona_Lisa\",\"label\":\"Mona Lisa\"}],\"lang\":\"en\",\"timestamp\":\"2018-03-14T12:45:44.766\"}";
 
         configMockResponse(text,auth_token,lang,responseCode,responseData);
@@ -209,7 +209,7 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
         String text = "Di a da in con su per tra fra.";
         String auth_token = "token";
         String lang = "auto";
-        Integer responseCode = HttpURLConnection.HTTP_OK;
+        int responseCode = HttpURLConnection.HTTP_OK;
         String responseData = "{\"time\":0,\"annotations\":[],\"lang\":\"it\",\"timestamp\":\"2018-03-14T14:17:34.315\"}";
         configMockResponse(text,auth_token,lang,responseCode,responseData);
 
@@ -234,7 +234,7 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
         String text = "La Torre Eiffel si trova a Parigi.";
         String auth_token = "token";
         String lang = "auto";
-        Integer responseCode = HttpURLConnection.HTTP_OK;
+        int responseCode = HttpURLConnection.HTTP_OK;
         String responseData = "{\"time\":2,\"annotations\":[{\"start\":3,\"end\":15,\"spot\":\"Torre Eiffel\",\"confidence\":0.9219,\"id\":10357,\"title\":\"Torre Eiffel\",\"uri\":\"http://it.wikipedia.org/wiki/Torre_Eiffel\",\"label\":\"Torre Eiffel\"},{\"start\":27,\"end\":33,\"spot\":\"Parigi\",\"confidence\":0.899,\"id\":3198,\"title\":\"Parigi\",\"uri\":\"http://it.wikipedia.org/wiki/Parigi\",\"label\":\"Parigi\"}],\"lang\":\"it\",\"timestamp\":\"2018-03-14T14:07:49.927\"}";
         configMockResponse(text,auth_token,lang,responseCode,responseData);
 

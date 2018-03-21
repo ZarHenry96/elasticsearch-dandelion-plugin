@@ -42,9 +42,9 @@ public final class DandelionTokenizer extends Tokenizer {
 
     private String inputString;
     private JsonArray annotations;
-    private Integer size;
-    private Integer index;
-    private Integer offset;
+    private int size;
+    private int index;
+    private int offset;
 
 
     public DandelionTokenizer(String auth_token, String lang) {
@@ -86,9 +86,9 @@ public final class DandelionTokenizer extends Tokenizer {
 
         if(index<size) {
             JsonObject entity = (JsonObject) annotations.get(index);
-            Integer begin = entity.get("start").getAsInt();
+            int begin = entity.get("start").getAsInt();
             if (begin == offset) {
-                Integer end = entity.get("end").getAsInt();
+                int end = entity.get("end").getAsInt();
                 String uri = entity.get("uri").getAsString();
                 termAtt.setEmpty().append(inputString.substring(begin, end));
                 offsetAtt.setOffset(begin, end);
@@ -106,7 +106,7 @@ public final class DandelionTokenizer extends Tokenizer {
                 throw new IOException("Error in entity offsets management!");
             }
         } else if (offset != inputString.length()){
-            Integer end = inputString.length();
+            int end = inputString.length();
             termAtt.setEmpty().append(inputString.substring(offset, end));
             offsetAtt.setOffset(offset, end);
             offset = end;
@@ -134,10 +134,10 @@ public final class DandelionTokenizer extends Tokenizer {
                     connection.setRequestMethod("GET");
                     connection.setRequestProperty("User-Agent", "Mozilla/5.0");
 
-                    Integer responseCode = connection.getResponseCode();
+                    int responseCode = connection.getResponseCode();
 
                     BufferedReader in;
-                    if (responseCode.equals(HttpURLConnection.HTTP_OK)){
+                    if (responseCode == HttpURLConnection.HTTP_OK){
                         in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                     }else{
                         in = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
