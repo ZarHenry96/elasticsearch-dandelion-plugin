@@ -30,6 +30,8 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
 
     private static HttpsUrlStreamHandler httpsUrlStreamHandler;
     private HttpURLConnection httpUrlConnection;
+    private String params_expected = "";
+    private String params_sent= "";
 
     @BeforeClass
     public static void setupURLStreamHandlerFactory() {
@@ -49,21 +51,23 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
     public void reset() {
         httpsUrlStreamHandler.resetConnections();
         httpUrlConnection = null;
+        params_expected = "";
+        params_sent = "";
     }
 
     private void configMockResponse(String text, String auth_token, String lang, int responseCode, String data) throws IOException {
         try{
             AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
                 public Void run() throws IOException {
-                    String reqParams = "?text=" + URLEncoder.encode(text, "utf-8") + "&token=" + auth_token + "&lang=" + lang;
-                    String href = "https://api.dandelion.eu/datatxt/nex/v1"+reqParams;
+                    String href = "https://api.dandelion.eu/datatxt/nex/v1";
+                    params_expected = "text=" + URLEncoder.encode(text, "utf-8") + "&token=" + auth_token + "&lang=" + lang;
 
                     httpUrlConnection = mock(HttpURLConnection.class);
                     httpsUrlStreamHandler.addConnection(new URL(href), httpUrlConnection);
 
                     switch(responseCode){
                         case -1:
-                            given(httpUrlConnection.getResponseCode()).willThrow(new IOException(data));
+                            given(httpUrlConnection.getOutputStream()).willThrow(new IOException(data));
                             return null;
                         case HttpURLConnection.HTTP_OK:
                             byte[] expectedDataBytes = data.getBytes();
@@ -75,6 +79,13 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
                             InputStream errorInputStream = new ByteArrayInputStream(expectedErrorBytes);
                             given(httpUrlConnection.getErrorStream()).willReturn(errorInputStream);
                     }
+
+                    given(httpUrlConnection.getOutputStream()).willReturn(new OutputStream() {
+                        @Override
+                        public void write(int b) throws IOException {
+                            params_sent += (char) b;
+                        }
+                    });
 
                     given(httpUrlConnection.getResponseCode()).willReturn(responseCode);
                     return null;
@@ -122,12 +133,20 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
 
         configMockResponse(text, auth_token, lang, responseCode, errorData);
 
-        thrown.expect(IOException.class);
-        thrown.expectMessage(exceptionMessage);
+        try{
+            Tokenizer dandelionTokenizer = new DandelionTokenizer(auth_token,"");
+            dandelionTokenizer.setReader(new StringReader(text));
+            dandelionTokenizer.reset();
+        } catch (IOException exception){
+            assertEquals(exception.getMessage(), exceptionMessage);
+        }
 
-        Tokenizer dandelionTokenizer = new DandelionTokenizer(auth_token,"");
-        dandelionTokenizer.setReader(new StringReader(text));
-        dandelionTokenizer.reset();
+        verify(httpUrlConnection,times(1)).setRequestMethod("POST");
+        verify(httpUrlConnection,times(1)).getOutputStream();
+        assertEquals(params_expected, params_sent);
+
+        verify(httpUrlConnection,times(1)).getResponseCode();
+        verify(httpUrlConnection,times(1)).getErrorStream();
     }
 
     @Test
@@ -148,6 +167,11 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
             new String[] {"","http://it.wikipedia.org/wiki/Gioconda","","http://it.wikipedia.org/wiki/Pittura",""},
             new int[] {1,1,1,1,1}
         );
+
+        verify(httpUrlConnection,times(1)).setRequestMethod("POST");
+        verify(httpUrlConnection,times(1)).getOutputStream();
+        assertEquals(params_expected, params_sent);
+
         verify(httpUrlConnection,times(1)).getResponseCode();
         verify(httpUrlConnection,times(1)).getInputStream();
     }
@@ -163,12 +187,20 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
 
         configMockResponse(text, auth_token, lang, responseCode, errorData);
 
-        thrown.expect(IOException.class);
-        thrown.expectMessage(exceptionMessage);
+        try{
+            Tokenizer dandelionTokenizer = new DandelionTokenizer(auth_token,"");
+            dandelionTokenizer.setReader(new StringReader(text));
+            dandelionTokenizer.reset();
+        } catch (IOException ex){
+            assertEquals(ex.getMessage(), exceptionMessage);
+        }
 
-        Tokenizer dandelionTokenizer = new DandelionTokenizer(auth_token,"");
-        dandelionTokenizer.setReader(new StringReader(text));
-        dandelionTokenizer.reset();
+        verify(httpUrlConnection,times(1)).setRequestMethod("POST");
+        verify(httpUrlConnection,times(1)).getOutputStream();
+        assertEquals(params_expected, params_sent);
+
+        verify(httpUrlConnection,times(1)).getResponseCode();
+        verify(httpUrlConnection,times(1)).getErrorStream();
     }
 
     @Test
@@ -200,6 +232,11 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
             new String[] {"http://en.wikipedia.org/wiki/Mona_Lisa",""},
             new int[] {1,1}
         );
+
+        verify(httpUrlConnection,times(1)).setRequestMethod("POST");
+        verify(httpUrlConnection,times(1)).getOutputStream();
+        assertEquals(params_expected, params_sent);
+
         verify(httpUrlConnection,times(1)).getResponseCode();
         verify(httpUrlConnection,times(1)).getInputStream();
     }
@@ -225,6 +262,10 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
             new int[] {}
         );
 
+        verify(httpUrlConnection,times(1)).setRequestMethod("POST");
+        verify(httpUrlConnection,times(1)).getOutputStream();
+        assertEquals(params_expected, params_sent);
+
         verify(httpUrlConnection,times(1)).getResponseCode();
         verify(httpUrlConnection,times(1)).getInputStream();
     }
@@ -249,6 +290,10 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
             new String[] {"word","word"},
             new int[] {1,1}
         );
+
+        verify(httpUrlConnection,times(1)).setRequestMethod("POST");
+        verify(httpUrlConnection,times(1)).getOutputStream();
+        assertEquals(params_expected, params_sent);
 
         verify(httpUrlConnection,times(1)).getResponseCode();
         verify(httpUrlConnection,times(1)).getInputStream();

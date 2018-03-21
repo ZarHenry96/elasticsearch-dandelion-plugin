@@ -1,6 +1,7 @@
 package org.elasticsearch.index.analysis;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Arrays;
 
@@ -87,23 +88,22 @@ public final class DandelionTokenizer extends Tokenizer {
         if(index<size) {
             JsonObject entity = (JsonObject) annotations.get(index);
             int begin = entity.get("start").getAsInt();
-            if (begin == offset) {
+
+            if (begin <= offset) {
                 int end = entity.get("end").getAsInt();
                 String uri = entity.get("uri").getAsString();
                 termAtt.setEmpty().append(inputString.substring(begin, end));
                 offsetAtt.setOffset(begin, end);
-                offset = end;
+                offset = Integer.max(end, offset);
                 typeAtt.setType(uri);
                 index++;
                 return true;
-            } else if (begin > offset) {
+            } else {
                 termAtt.setEmpty().append(inputString.substring(offset, begin));
                 offsetAtt.setOffset(offset, begin);
                 offset = begin;
                 typeAtt.setType("");
                 return true;
-            } else {
-                throw new IOException("Error in entity offsets management!");
             }
         } else if (offset != inputString.length()){
             int end = inputString.length();
@@ -119,8 +119,8 @@ public final class DandelionTokenizer extends Tokenizer {
 
     private void dandelionApiCall() throws IOException {
 
-        String baseUrl = "https://api.dandelion.eu/datatxt/nex/v1";
-        final String url = baseUrl + "?text=" + URLEncoder.encode(inputString, "utf-8") + "&token=" + auth_token + "&lang=" + lang;
+        String url = "https://api.dandelion.eu/datatxt/nex/v1";
+        String parameters = "text=" + URLEncoder.encode(inputString, "utf-8") + "&token=" + auth_token + "&lang=" + lang;
 
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
@@ -131,8 +131,15 @@ public final class DandelionTokenizer extends Tokenizer {
                 public JsonArray run() throws IOException {
                     URL urlObj = new URL(url);
                     HttpURLConnection connection = (HttpURLConnection) urlObj.openConnection();
-                    connection.setRequestMethod("GET");
+                    connection.setDoOutput(true);
+                    connection.setRequestMethod("POST");
                     connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+                    connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+
+                    OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
+                    outputStreamWriter.write(parameters);
+                    outputStreamWriter.flush();
+                    outputStreamWriter.close();
 
                     int responseCode = connection.getResponseCode();
 
@@ -153,6 +160,8 @@ public final class DandelionTokenizer extends Tokenizer {
                     Gson gson = new Gson();
                     JsonElement element = gson.fromJson(response.toString(), JsonElement.class);
                     JsonObject jsonObject = element.getAsJsonObject();
+
+                    connection.disconnect();
 
                     switch (responseCode) {
                         case HttpURLConnection.HTTP_OK:
