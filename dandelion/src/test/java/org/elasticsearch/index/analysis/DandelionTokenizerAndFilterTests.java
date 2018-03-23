@@ -177,6 +177,20 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
     }
 
     @Test
+    public void testTokenizerShouldThrowExceptionIfPayloadSizeIsExcessive() throws IOException{
+        String text = new String(new char[1048577]);
+        String auth_token = "token";
+        String exceptionMessage = "request body too large, the current limit is set to 1MiB";
+
+        thrown.expect(IOException.class);
+        thrown.expectMessage(exceptionMessage);
+
+        Tokenizer dandelionTokenizer = new DandelionTokenizer(auth_token,"");
+        dandelionTokenizer.setReader(new StringReader(text));
+        dandelionTokenizer.reset();
+    }
+
+    @Test
     public void testTokenizerShouldThrowExceptionIfTextIsEmptyAndLangNotSpecified() throws IOException{
         String text = "";
         String auth_token = "token";

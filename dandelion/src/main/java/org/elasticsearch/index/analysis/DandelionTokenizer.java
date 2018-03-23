@@ -1,7 +1,6 @@
 package org.elasticsearch.index.analysis;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.util.List;
 import java.util.Arrays;
 
@@ -17,8 +16,6 @@ import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 
 import java.net.URLEncoder;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -33,6 +30,8 @@ public final class DandelionTokenizer extends Tokenizer {
     private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
     private final PositionIncrementAttribute posIncrAtt = addAttribute(PositionIncrementAttribute.class);
     private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
+
+    private final int maxChars = 1048576;
 
     private final List<String> allowedLanguages = Arrays.asList("auto","de","en","es","fr","it","pt","ru","af",
         "sq","ar","bn","bg","hr","cs","da","nl","et","fi","el","gu","he","hi","hu","id","ja","kn","ko","lv","lt",
@@ -73,10 +72,14 @@ public final class DandelionTokenizer extends Tokenizer {
     }
 
     private void setInputString() throws IOException {
-        inputString = "";
-        int intValueOfChar;
-        while ((intValueOfChar = input.read()) != -1) {
-            inputString += (char) intValueOfChar;
+        inputString = null;
+        char[] characters = new char[maxChars+1];
+
+        int readChars = input.read(characters, 0, maxChars+1);
+        if(readChars <= maxChars && input.read()==-1){
+            inputString = new String(characters,0,Integer.max(readChars,0));
+        } else {
+            throw new IOException("request body too large, the current limit is set to 1MiB");
         }
     }
 
@@ -120,7 +123,12 @@ public final class DandelionTokenizer extends Tokenizer {
     private void dandelionApiCall() throws IOException {
 
         String url = "https://api.dandelion.eu/datatxt/nex/v1";
-        String parameters = "text=" + URLEncoder.encode(inputString, "utf-8") + "&token=" + auth_token + "&lang=" + lang;
+        String parameters = "text=" + URLEncoder.encode(inputString, "utf-8") + "&token=" + URLEncoder.encode(auth_token, "utf-8") + "&lang=" + URLEncoder.encode(lang, "utf-8");
+        byte[] parametersBytes = parameters.getBytes("UTF-8");
+
+        if(parametersBytes.length > maxChars){
+            throw new IOException("request body too large, the current limit is set to 1MiB");
+        }
 
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
@@ -136,10 +144,10 @@ public final class DandelionTokenizer extends Tokenizer {
                     connection.setRequestProperty("User-Agent", "Mozilla/5.0");
                     connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
 
-                    OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
-                    outputStreamWriter.write(parameters);
-                    outputStreamWriter.flush();
-                    outputStreamWriter.close();
+                    OutputStream out = connection.getOutputStream();
+                    out.write(parametersBytes);
+                    out.flush();
+                    out.close();
 
                     int responseCode = connection.getResponseCode();
 
