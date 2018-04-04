@@ -3,7 +3,6 @@ package org.elasticsearch.index.analysis;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.IndexSettings;
-import org.elasticsearch.index.analysis.AbstractIndexAnalyzerProvider;
 
 public class DandelionAnalyzerProvider extends AbstractIndexAnalyzerProvider<DandelionAnalyzer> {
 
@@ -11,7 +10,7 @@ public class DandelionAnalyzerProvider extends AbstractIndexAnalyzerProvider<Dan
 
     public DandelionAnalyzerProvider(IndexSettings indexSettings, Environment env, String name, Settings settings) {
         super(indexSettings, name, settings);
-        dandelionAnalyzer = new DandelionAnalyzer(settings.get("auth"),settings.get("lang"));
+        dandelionAnalyzer = new DandelionAnalyzer(settings.get("auth"),settings.get("lang"),settings.get("multilang"));
     }
 
     @Override

@@ -164,7 +164,7 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
             new String[] {"La ","Gioconda"," è un ","quadro","."},
             new int[] {0,3,11,17,23},
             new int[] {3,11,17,23,24},
-            new String[] {"","http://it.wikipedia.org/wiki/Gioconda","","http://it.wikipedia.org/wiki/Pittura",""},
+            new String[] {"","https://it.wikipedia.org/wiki/Gioconda","","https://it.wikipedia.org/wiki/Pittura",""},
             new int[] {1,1,1,1,1}
         );
 
@@ -224,7 +224,7 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Illegal language (lang) parameter! Check on dandelion.eu the possible values; if not specified auto will be used.");
 
-        Tokenizer dandelionTokenizer = new DandelionTokenizer(auth_token,"ven");
+        Tokenizer dandelionTokenizer = new DandelionTokenizer(auth_token,"nonexlang");
     }
 
     @Test
@@ -243,7 +243,7 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
             new String[] {"Mona Lisa","."},
             new int[] {0,9},
             new int[] {9,10},
-            new String[] {"http://en.wikipedia.org/wiki/Mona_Lisa",""},
+            new String[] {"https://en.wikipedia.org/wiki/Mona_Lisa",""},
             new int[] {1,1}
         );
 
@@ -266,7 +266,7 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
 
         Tokenizer dandelionTokenizer = new DandelionTokenizer(auth_token,lang);
         dandelionTokenizer.setReader(new StringReader(text));
-        TokenFilter tokenFilter = new DandelionTokenFilter(dandelionTokenizer);
+        TokenFilter tokenFilter = new DandelionTokenFilter(dandelionTokenizer,null);
 
         BaseTokenStreamTestCase.assertTokenStreamContents(tokenFilter,
             new String[] {},
@@ -295,14 +295,14 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
 
         Tokenizer dandelionTokenizer = new DandelionTokenizer(auth_token,lang);
         dandelionTokenizer.setReader(new StringReader(text));
-        TokenFilter tokenFilter = new DandelionTokenFilter(dandelionTokenizer);
+        TokenFilter tokenFilter = new DandelionTokenFilter(dandelionTokenizer,"");
 
         BaseTokenStreamTestCase.assertTokenStreamContents(tokenFilter,
-            new String[] {"http://it.wikipedia.org/wiki/Torre_Eiffel","http://it.wikipedia.org/wiki/Parigi"},
+            new String[] {"https://it.wikipedia.org/wiki/Torre_Eiffel","https://it.wikipedia.org/wiki/Parigi"},
             new int[] {3,27},
             new int[] {15,33},
             new String[] {"word","word"},
-            new int[] {1,1}
+            new int[] {2,2}
         );
 
         verify(httpUrlConnection,times(1)).setRequestMethod("POST");

@@ -1,8 +1,6 @@
 package org.elasticsearch.index.analysis;
 
 import java.io.*;
-import java.util.List;
-import java.util.Arrays;
 
 import org.elasticsearch.SpecialPermission;
 import java.security.AccessController;
@@ -24,6 +22,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 
+import static org.elasticsearch.plugin.analysis.DandelionAnalysisPlugin.ALLOWED_LANGUAGES;
+
 public final class DandelionTokenizer extends Tokenizer {
 
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
@@ -32,10 +32,6 @@ public final class DandelionTokenizer extends Tokenizer {
     private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
 
     private final int maxChars = 1048576;
-
-    private final List<String> allowedLanguages = Arrays.asList("auto","de","en","es","fr","it","pt","ru","af",
-        "sq","ar","bn","bg","hr","cs","da","nl","et","fi","el","gu","he","hi","hu","id","ja","kn","ko","lv","lt",
-        "mk","ml","mr","ne","no","pa","fa","pl","ro","sk","sl","sw","sv","tl","ta","te","th","tr","uk","ur","vi");
 
     private String auth_token;
     private String lang;
@@ -56,7 +52,7 @@ public final class DandelionTokenizer extends Tokenizer {
         }
         if(lang == null || lang.isEmpty()){
             this.lang = "auto";
-        }else if (allowedLanguages.contains(lang)){
+        }else if (ALLOWED_LANGUAGES.contains(lang)){
             this.lang = lang;
         }else {
             throw new IllegalArgumentException("Illegal language (lang) parameter! Check on dandelion.eu the possible values; if not specified auto will be used.");
@@ -84,7 +80,7 @@ public final class DandelionTokenizer extends Tokenizer {
     }
 
     @Override
-    public boolean incrementToken() throws IOException {
+    public boolean incrementToken() {
 
         clearAttributes();
 
@@ -98,7 +94,7 @@ public final class DandelionTokenizer extends Tokenizer {
                 termAtt.setEmpty().append(inputString.substring(begin, end));
                 offsetAtt.setOffset(begin, end);
                 offset = Integer.max(end, offset);
-                typeAtt.setType(uri);
+                typeAtt.setType("https://".concat(uri.substring(7)));
                 index++;
                 return true;
             } else {
@@ -121,10 +117,9 @@ public final class DandelionTokenizer extends Tokenizer {
     }
 
     private void dandelionApiCall() throws IOException {
-
-        String url = "https://api.dandelion.eu/datatxt/nex/v1";
+        final String url = "https://api.dandelion.eu/datatxt/nex/v1";
         String parameters = "text=" + URLEncoder.encode(inputString, "utf-8") + "&token=" + URLEncoder.encode(auth_token, "utf-8") + "&lang=" + URLEncoder.encode(lang, "utf-8");
-        byte[] parametersBytes = parameters.getBytes("UTF-8");
+        final byte[] parametersBytes = parameters.getBytes("UTF-8");
 
         if(parametersBytes.length > maxChars){
             throw new IOException("request body too large, the current limit is set to 1MiB");

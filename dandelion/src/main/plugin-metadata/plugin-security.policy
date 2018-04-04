@@ -1,6 +1,7 @@
 grant {
    // plugin permission
    permission java.net.SocketPermission "api.dandelion.eu:443", "connect,resolve";
+   permission java.net.SocketPermission "it.wikipedia.org:443", "connect,resolve";
 
    //test permissions
    permission java.lang.RuntimePermission "accessClassInPackage.sun.reflect";
