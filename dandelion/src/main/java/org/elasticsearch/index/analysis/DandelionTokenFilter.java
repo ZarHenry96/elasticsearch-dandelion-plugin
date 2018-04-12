@@ -29,8 +29,8 @@ import static org.elasticsearch.plugin.analysis.DandelionAnalysisPlugin.ALLOWED_
 
 public class DandelionTokenFilter extends TokenFilter {
 
-	private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
-	private final OffsetAttribute offsAtt = addAttribute(OffsetAttribute.class);
+    private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
+    private final OffsetAttribute offsAtt = addAttribute(OffsetAttribute.class);
     private final PositionIncrementAttribute posIncrAtt = addAttribute(PositionIncrementAttribute.class);
     private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
 
@@ -42,24 +42,39 @@ public class DandelionTokenFilter extends TokenFilter {
 
     private int skipped_positions = 0;
 
-	public DandelionTokenFilter(TokenStream in, String multilang){
-		super(in);
-		if(multilang == null || multilang.isEmpty() || multilang.equals("false")){
-		    this.multilang = false;
+    public DandelionTokenFilter(TokenStream in, String multilang){
+        super(in);
+        if(!(in.hasAttribute(CharTermAttribute.class) &&
+            in.hasAttribute(OffsetAttribute.class) &&
+            in.hasAttribute(PositionIncrementAttribute.class) &&
+            in.hasAttribute(TypeAttribute.class))) {
+            throw new IllegalArgumentException("The selected tokenizer does not provide all the attributes required by the Dandelion TokenFilter!");
+        }
+
+        if(multilang == null || multilang.isEmpty() || multilang.equals("false")){
+            this.multilang = false;
         } else if(multilang.equals("true")){
             this.multilang = true;
         }else{
             throw new IllegalArgumentException("Illegal multilang parameter value: only true/false are allowed!");
         }
-	}
+    }
 
-	private String[] configRequestElements(String entity) throws IOException{
+    private String[] configRequestElements(String entity) throws IOException{
         int lang_begin = 8;
         int lang_end = entity.indexOf('.', lang_begin);
-        String lang = entity.substring(lang_begin, lang_end);
-
         int title_begin = entity.lastIndexOf('/');
+
+        if(lang_end == -1 || title_begin == -1){
+            throw new IOException("DandelionTokenFilter multilang exception: the entity provided by the tokenizer has a wrong format!");
+        }
+
+        String lang = entity.substring(lang_begin, lang_end);
         String title = entity.substring(title_begin+1);
+
+        if(!ALLOWED_LANGUAGES.contains(lang)){
+            throw new IOException("DandelionTokenFilter multilang exception: the entity provided by the tokenizer has a wrong format in terms of language prefix (unsupported)!");
+        }
 
         String[] res = new String[2];
         res[0] = "https://"+lang+".wikipedia.org/w/api.php";
@@ -68,8 +83,8 @@ public class DandelionTokenFilter extends TokenFilter {
         return res;
     }
 
-	private void wikiApiCall(String entity) throws IOException{
-	    String[] config = configRequestElements(entity);
+    private void wikiApiCall(String entity) throws IOException{
+        String[] config = configRequestElements(entity);
         final String url = config[0];
         final byte[] parametersBytes = config[1].getBytes("UTF-8");
 
@@ -128,11 +143,12 @@ public class DandelionTokenFilter extends TokenFilter {
 
         Iterator<String> iterator = page_ids.iterator();
         String key = iterator.next();
-        if(key.equals("-1")){
+        JsonObject page = pages.getAsJsonObject(key);
+        if(Integer.parseInt(key) < 0 || page.getAsJsonArray("langlinks") == null){
             return;
         }
 
-        JsonArray langlinks = pages.getAsJsonObject(key).getAsJsonArray("langlinks");
+        JsonArray langlinks = page.getAsJsonArray("langlinks");
 
         int size = langlinks.size();
         for(int index = 0; index < size; index++){
@@ -144,10 +160,10 @@ public class DandelionTokenFilter extends TokenFilter {
 
     }
 
-	public final boolean incrementToken() throws IOException {
+    public final boolean incrementToken() throws IOException {
 
-	    if(!extraTokens.isEmpty()){
-	        clearAttributes();
+        if(!extraTokens.isEmpty()){
+            clearAttributes();
 
             termAtt.setEmpty().append(extraTokens.remove(0));
             offsAtt.setOffset(startOffset, endOffset);
@@ -157,8 +173,8 @@ public class DandelionTokenFilter extends TokenFilter {
             return true;
         }
 
-	    while (input.incrementToken()) {
-            if(!typeAtt.type().equals("")){
+        while (input.incrementToken()) {
+            if(typeAtt.type().startsWith("https://") && typeAtt.type().contains("wikipedia.org")){
                 if(multilang) {
                     wikiApiCall(typeAtt.type());
                     startOffset = offsAtt.startOffset();
@@ -172,9 +188,9 @@ public class DandelionTokenFilter extends TokenFilter {
             } else {
                 skipped_positions+=posIncrAtt.getPositionIncrement();
             }
-	    }
+        }
 
-	    return false;
-	}
+        return false;
+    }
 
 }

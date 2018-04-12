@@ -3,7 +3,6 @@ package org.elasticsearch.index.analysis;
 import static org.mockito.BDDMockito.*;
 
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
-import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.Tokenizer;
 import org.elasticsearch.index.analysis.mock.HttpsUrlStreamHandler;
 import org.elasticsearch.test.ESTestCase;
@@ -23,7 +22,7 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
-public class DandelionTokenizerAndFilterTests extends ESTestCase {
+public class DandelionTokenizerTests extends ESTestCase {
 
     @Rule
     public ExpectedException thrown= ExpectedException.none();
@@ -88,6 +87,7 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
                     });
 
                     given(httpUrlConnection.getResponseCode()).willReturn(responseCode);
+
                     return null;
                 }
             });
@@ -245,64 +245,6 @@ public class DandelionTokenizerAndFilterTests extends ESTestCase {
             new int[] {9,10},
             new String[] {"https://en.wikipedia.org/wiki/Mona_Lisa",""},
             new int[] {1,1}
-        );
-
-        verify(httpUrlConnection,times(1)).setRequestMethod("POST");
-        verify(httpUrlConnection,times(1)).getOutputStream();
-        assertEquals(params_expected, params_sent);
-
-        verify(httpUrlConnection,times(1)).getResponseCode();
-        verify(httpUrlConnection,times(1)).getInputStream();
-    }
-
-    @Test
-    public void testTokenFilterWithoutEntityTokens() throws IOException{
-        String text = "Di a da in con su per tra fra.";
-        String auth_token = "token";
-        String lang = "auto";
-        int responseCode = HttpURLConnection.HTTP_OK;
-        String responseData = "{\"time\":0,\"annotations\":[],\"lang\":\"it\",\"timestamp\":\"2018-03-14T14:17:34.315\"}";
-        configMockResponse(text,auth_token,lang,responseCode,responseData);
-
-        Tokenizer dandelionTokenizer = new DandelionTokenizer(auth_token,lang);
-        dandelionTokenizer.setReader(new StringReader(text));
-        TokenFilter tokenFilter = new DandelionTokenFilter(dandelionTokenizer,null);
-
-        BaseTokenStreamTestCase.assertTokenStreamContents(tokenFilter,
-            new String[] {},
-            new int[] {},
-            new int[] {},
-            new String[] {},
-            new int[] {}
-        );
-
-        verify(httpUrlConnection,times(1)).setRequestMethod("POST");
-        verify(httpUrlConnection,times(1)).getOutputStream();
-        assertEquals(params_expected, params_sent);
-
-        verify(httpUrlConnection,times(1)).getResponseCode();
-        verify(httpUrlConnection,times(1)).getInputStream();
-    }
-
-    @Test
-    public void testTokenFilterWithEntityTokens() throws IOException{
-        String text = "La Torre Eiffel si trova a Parigi.";
-        String auth_token = "token";
-        String lang = "auto";
-        int responseCode = HttpURLConnection.HTTP_OK;
-        String responseData = "{\"time\":2,\"annotations\":[{\"start\":3,\"end\":15,\"spot\":\"Torre Eiffel\",\"confidence\":0.9219,\"id\":10357,\"title\":\"Torre Eiffel\",\"uri\":\"http://it.wikipedia.org/wiki/Torre_Eiffel\",\"label\":\"Torre Eiffel\"},{\"start\":27,\"end\":33,\"spot\":\"Parigi\",\"confidence\":0.899,\"id\":3198,\"title\":\"Parigi\",\"uri\":\"http://it.wikipedia.org/wiki/Parigi\",\"label\":\"Parigi\"}],\"lang\":\"it\",\"timestamp\":\"2018-03-14T14:07:49.927\"}";
-        configMockResponse(text,auth_token,lang,responseCode,responseData);
-
-        Tokenizer dandelionTokenizer = new DandelionTokenizer(auth_token,lang);
-        dandelionTokenizer.setReader(new StringReader(text));
-        TokenFilter tokenFilter = new DandelionTokenFilter(dandelionTokenizer,"");
-
-        BaseTokenStreamTestCase.assertTokenStreamContents(tokenFilter,
-            new String[] {"https://it.wikipedia.org/wiki/Torre_Eiffel","https://it.wikipedia.org/wiki/Parigi"},
-            new int[] {3,27},
-            new int[] {15,33},
-            new String[] {"word","word"},
-            new int[] {2,2}
         );
 
         verify(httpUrlConnection,times(1)).setRequestMethod("POST");
