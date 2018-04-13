@@ -1,6 +1,9 @@
+#Build
+build/
+
 #Intellij files
 *.iml
 build-idea/
 
-#Build
-build/
+#Gradle
+.gradle/
