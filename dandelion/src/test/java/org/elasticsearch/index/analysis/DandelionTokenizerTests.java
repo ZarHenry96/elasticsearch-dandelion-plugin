@@ -5,6 +5,7 @@ import static org.mockito.BDDMockito.*;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
 import org.apache.lucene.analysis.Tokenizer;
 import org.elasticsearch.index.analysis.mock.HttpsUrlStreamHandler;
+import org.elasticsearch.index.analysis.mock.URLStreamHandlerFactoryUtils;
 import org.elasticsearch.test.ESTestCase;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -36,11 +37,7 @@ public class DandelionTokenizerTests extends ESTestCase {
     public static void setupURLStreamHandlerFactory() {
         AccessController.doPrivileged(new PrivilegedAction<Void>() {
             public Void run() {
-                URLStreamHandlerFactory urlStreamHandlerFactory = mock(URLStreamHandlerFactory.class);
-                URL.setURLStreamHandlerFactory(urlStreamHandlerFactory);
-
-                httpsUrlStreamHandler = new HttpsUrlStreamHandler();
-                given(urlStreamHandlerFactory.createURLStreamHandler("https")).willReturn(httpsUrlStreamHandler);
+                httpsUrlStreamHandler = URLStreamHandlerFactoryUtils.getHttpsUrlStreamHandler();
                 return null;
             }
         });

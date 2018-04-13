@@ -29,6 +29,7 @@ import java.util.List;
 
 import static org.elasticsearch.mock.orig.Mockito.*;
 import static org.mockito.BDDMockito.given;
+import org.elasticsearch.index.analysis.mock.URLStreamHandlerFactoryUtils;
 
 public class DandelionTokenFilterTests extends ESTestCase {
 
@@ -45,11 +46,7 @@ public class DandelionTokenFilterTests extends ESTestCase {
     public static void setupURLStreamHandlerFactory() {
         AccessController.doPrivileged(new PrivilegedAction<Void>() {
             public Void run() {
-                URLStreamHandlerFactory urlStreamHandlerFactory = mock(URLStreamHandlerFactory.class);
-                URL.setURLStreamHandlerFactory(urlStreamHandlerFactory);
-
-                httpsUrlStreamHandler = new HttpsUrlStreamHandler();
-                given(urlStreamHandlerFactory.createURLStreamHandler("https")).willReturn(httpsUrlStreamHandler);
+                httpsUrlStreamHandler = URLStreamHandlerFactoryUtils.getHttpsUrlStreamHandler();
                 return null;
             }
         });
@@ -228,6 +225,7 @@ public class DandelionTokenFilterTests extends ESTestCase {
         configTokenFilterMockResponse(langTF,status,reqTitles,responseDataTF);
 
         String exceptionMessage = "failed to connect to "+langTF+".wikipedia.org";
+
         thrown.expect(IOException.class);
         thrown.expectMessage(exceptionMessage);
 
@@ -235,6 +233,7 @@ public class DandelionTokenFilterTests extends ESTestCase {
         dandelionTokenizer.setReader(new StringReader(text));
         TokenFilter tokenFilter = new DandelionTokenFilter(dandelionTokenizer,multilang);
 
+        //It's needed to start the analysis process
         BaseTokenStreamTestCase.assertTokenStreamContents(tokenFilter,
             new String[] {},
             new int[] {},
@@ -271,10 +270,16 @@ public class DandelionTokenFilterTests extends ESTestCase {
             new String[] {"word"},
             new int[] {2}
         );
+
+        int numberOfTimes = reqTitles.length;
+        verify(tokenFilterHttpUrlConnection,times(numberOfTimes)).setRequestMethod("POST");
+        verify(tokenFilterHttpUrlConnection,times(numberOfTimes)).getOutputStream();
+        assertEquals(params_expected, params_sent);
+        verify(tokenFilterHttpUrlConnection,times(numberOfTimes)).getInputStream();
     }
 
     @Test
-    public void testTokenFilterWithMultiLangEnabledAndEmptyLanglinks() throws IOException {
+    public void testTokenFilterWithMultiLangEnabledAndWithoutLanglinks() throws IOException {
         String text = "La Torre Eiffel è altissima.";
         String auth_token = "token";
         String langT = "auto";
@@ -285,7 +290,7 @@ public class DandelionTokenFilterTests extends ESTestCase {
 
         String langTF= "it";
         int status = 200;
-        String [] reqTitles = new String[] {"Torre_Eifel"};
+        String [] reqTitles = new String[] {"Torre_Eiffel"};
         String [] responseDataTF = new String[] {"{\"batchcomplete\":\"\",\"query\":{\"normalized\":[{\"from\":\"Torre_Eiffel\",\"to\":\"Torre Eiffel\"}],\"pages\":{\"10357\":{\"pageid\":10357,\"ns\":0,\"title\":\"Torre Eiffel\"}}}}"};
         configTokenFilterMockResponse(langTF,status,reqTitles,responseDataTF);
 
@@ -300,6 +305,12 @@ public class DandelionTokenFilterTests extends ESTestCase {
             new String[] {"word"},
             new int[] {2}
         );
+
+        int numberOfTimes = reqTitles.length;
+        verify(tokenFilterHttpUrlConnection,times(numberOfTimes)).setRequestMethod("POST");
+        verify(tokenFilterHttpUrlConnection,times(numberOfTimes)).getOutputStream();
+        assertEquals(params_expected, params_sent);
+        verify(tokenFilterHttpUrlConnection,times(numberOfTimes)).getInputStream();
     }
 
     @Test
@@ -320,15 +331,15 @@ public class DandelionTokenFilterTests extends ESTestCase {
         String langTF = json.get("langTF").getAsString();
         int status = json.get("wikiStatus").getAsInt();
 
-        JsonArray jsonArrayRT = json.getAsJsonArray("wikiReqTitles");
-        JsonArray jsonArrayW = json.getAsJsonArray("wikiResponses");
+        JsonArray jsonArrayWRT = json.getAsJsonArray("wikiReqTitles");
+        JsonArray jsonArrayWR = json.getAsJsonArray("wikiResponses");
 
-        String [] reqTitles = new String[jsonArrayRT.size()];
-        String [] responseDataTF = new String[jsonArrayW.size()];
+        String [] reqTitles = new String[jsonArrayWRT.size()];
+        String [] responseDataTF = new String[jsonArrayWR.size()];
 
-        for(int i = 0; i < jsonArrayRT.size(); i++){
-            reqTitles[i] = jsonArrayRT.get(i).getAsString();
-            responseDataTF[i] = jsonArrayW.get(i).getAsJsonObject().toString();
+        for(int i = 0; i < jsonArrayWRT.size(); i++){
+            reqTitles[i] = jsonArrayWRT.get(i).getAsString();
+            responseDataTF[i] = jsonArrayWR.get(i).getAsJsonObject().toString();
         }
 
         configTokenFilterMockResponse(langTF, status, reqTitles, responseDataTF);
@@ -338,21 +349,21 @@ public class DandelionTokenFilterTests extends ESTestCase {
         TokenFilter tokenFilter = new DandelionTokenFilter(dandelionTokenizer,multilang);
 
         JsonArray jsonArrayT = json.getAsJsonArray("tokens");
-        JsonArray jsonArrayTSO = json.getAsJsonArray("startOffsets");
-        JsonArray jsonArrayTEO = json.getAsJsonArray("endOffsets");
+        JsonArray jsonArraySO = json.getAsJsonArray("startOffsets");
+        JsonArray jsonArrayEO = json.getAsJsonArray("endOffsets");
         JsonArray jsonArrayTY = json.getAsJsonArray("types");
         JsonArray jsonArrayPI = json.getAsJsonArray("positionIncrements");
 
         String [] tokens = new String[jsonArrayT.size()];
-        int [] startOffsets = new int[jsonArrayTSO.size()];
-        int [] endOffsets = new int[jsonArrayTEO.size()];
+        int [] startOffsets = new int[jsonArraySO.size()];
+        int [] endOffsets = new int[jsonArrayEO.size()];
         String [] types = new String[jsonArrayTY.size()];
         int [] positionIncrements = new int[jsonArrayPI.size()];
 
         for(int i = 0; i < jsonArrayT.size(); i++){
             tokens[i] = jsonArrayT.get(i).getAsString();
-            startOffsets[i] = jsonArrayTSO.get(i).getAsInt();
-            endOffsets[i] = jsonArrayTEO.get(i).getAsInt();
+            startOffsets[i] = jsonArraySO.get(i).getAsInt();
+            endOffsets[i] = jsonArrayEO.get(i).getAsInt();
             types[i] = jsonArrayTY.get(i).getAsString();
             positionIncrements[i] = jsonArrayPI.get(i).getAsInt();
         }

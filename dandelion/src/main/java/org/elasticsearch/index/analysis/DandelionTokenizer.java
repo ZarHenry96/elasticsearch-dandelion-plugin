@@ -161,7 +161,12 @@ public final class DandelionTokenizer extends Tokenizer {
                     in.close();
 
                     Gson gson = new Gson();
-                    JsonElement element = gson.fromJson(response.toString(), JsonElement.class);
+                    JsonElement element;
+                    try{
+                        element = gson.fromJson(response.toString(), JsonElement.class);
+                    } catch (Exception ex){
+                        throw new IOException("Tokenizer exception: malformed dandelion response!");
+                    }
                     JsonObject jsonObject = element.getAsJsonObject();
 
                     connection.disconnect();

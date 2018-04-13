@@ -131,14 +131,22 @@ public class DandelionTokenFilter extends TokenFilter {
 
     private void processResponse(String response) throws IOException{
         Gson gson = new Gson();
-        JsonElement element = gson.fromJson(response, JsonElement.class);
+        JsonElement element;
+        try{
+            element = gson.fromJson(response, JsonElement.class);
+        } catch (Exception ex){
+            throw new IOException("TokenFilter exception: malformed wikipedia response!");
+        }
         JsonObject jsonObject = element.getAsJsonObject();
 
+        if(!(jsonObject.has("query") && jsonObject.getAsJsonObject("query").has("pages"))){
+            throw new IOException("The data returned by the wikipedia langlinks api has a wrong format!");
+        }
         JsonObject pages = jsonObject.getAsJsonObject("query").getAsJsonObject("pages");
 
         Set<String> page_ids =  pages.keySet();
         if(page_ids.size() != 1){
-            throw new IOException("Wrong number of pages returned by wikipedia langlinks api!");
+            throw new IOException("Wrong number of pages returned by the wikipedia langlinks api!");
         }
 
         Iterator<String> iterator = page_ids.iterator();
