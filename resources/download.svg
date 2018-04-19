@@ -1,0 +1,19 @@
+<svg width="100" height="20" xmlns="http://www.w3.org/2000/svg" style="vector-effect: non-scaling-stroke;">
+ <!-- Created with Method Draw - http://github.com/duopixel/Method-Draw/ -->
+ <g>
+  <title>background</title>
+  <rect fill="#fff" id="canvas_background" height="22" width="102" y="-1" x="-1"/>
+  <g style="vector-effect: non-scaling-stroke;" display="none" overflow="visible" y="0" x="0" height="100%" width="100%" id="canvasGrid">
+   <rect fill="url(#gridpattern)" stroke-width="0" y="0" x="0" height="100%" width="100%"/>
+  </g>
+ </g>
+ <g>
+  <title>Layer 1</title>
+  <rect x="1" y="1" rx="8" id="svg_1" height="18" width="98" stroke-width="0" stroke="#000" fill="#444444"/>
+  <text transform="matrix(1.76454, 0, 0, 1.9322, -46.6367, -127.304)" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="5" id="svg_3" y="73.105265" x="30.932462" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#ffffff">Download</text>
+  <rect rx="8" id="svg_5" height="18" width="44" y="1" x="55.000014" stroke-width="0" stroke="#426373" fill="#0000d6"/>
+  <rect id="svg_6" height="18" width="10" y="1" x="56" stroke-width="0" stroke="#426373" fill="#0000d6"/>
+  <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_2" y2="19" x2="55" y1="1" x1="55" stroke-width="1.5" stroke="#000" fill="none"/>
+  <text transform="matrix(1.73737, 0, 0, 1.78148, -269.876, -92.3576)" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="7" id="svg_4" y="59.960596" x="192.173759" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#ffffff">6.2.3</text>
+ </g>
+</svg>

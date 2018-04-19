@@ -23,7 +23,7 @@ esplugin {
 }
 
 if(version == "unspecified"){
-    version = "${build_version}-SNAPSHOT"
+    version = "${build_version}"
 }
 
 sourceCompatibility = "${java_version}"
