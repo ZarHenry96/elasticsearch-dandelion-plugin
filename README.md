@@ -42,7 +42,7 @@ Continue with installation? [y/N]
 ```
 These permissions are necessary for the correct functioning of the plugin and tests, so type y and press Enter.
 
-Finally, be sure to restart Elasticsearch.
+**Finally, be sure to restart Elasticsearch**.
 
 **NOTE**: if you are interested in installation details, see [More on installation procedure](#more-on-installation-procedure)
 
