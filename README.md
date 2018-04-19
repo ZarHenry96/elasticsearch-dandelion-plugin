@@ -56,7 +56,7 @@ Once you have it, you can start to use Dandelion anlayzer ('dandelion-a').
 #### Index creation
 
 First of all you have to create an index.\
-**NOTE**: to make this code work, you have to replace the value of the field "auth" in dandelion_analyzer with your authorization token.
+**NOTE**: to make this code work, you have to replace the value of the field "auth" in "dandelion_analyzer" with your authorization token.
 ```bash
 curl -XPUT 'localhost:9200/dandelion?pretty' -H 'Content-Type: application/json' -d'
 {
