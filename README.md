@@ -98,7 +98,6 @@ curl -XPUT 'http://localhost:9200/dandelion/_doc/gioconda?pretty' -H 'Content-Ty
 }
 '
 ```
-You can also not specificy the id of the document (gioconda), the system will provide one.
 
 #### Search (query)
 
@@ -263,3 +262,10 @@ The fastest is the one shown in quick start, which combines these two steps into
     * To do it, run the command: `./bin/elasticsearch-plugin install file:///path/to/zip`.
 
     * Alternatively, you can unzip it and place what you have extracted into elasticsearch's plugins folder.
+
+## Uninstall plugin
+
+If you want to uninstall Dandelion plugin, run this command from the elasticsearch root directory:
+```bash
+./bin/elasticsearch-plugin remove dandelion
+```
