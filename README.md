@@ -1,4 +1,4 @@
-# Dandelion plugin for Elasticsearch
+# Dandelion analysis plugin for Elasticsearch
 
 [![Download](resources/download.svg)](https://github.com/ZarHenry96/elasticsearch-dandelion-plugin/releases/download/v6.2.4/dandelion-6.2.4.zip)
 
@@ -55,7 +55,8 @@ Once you have it, you can start to use Dandelion anlayzer ('dandelion-a').
 
 #### Index creation
 
-First of all you have to create an index. For example:
+First of all you have to create an index.\
+**NOTE**: to make this code work, you have to replace the value of the field "auth" in "dandelion_analyzer" with your authorization token.
 ```bash
 curl -XPUT 'localhost:9200/dandelion?pretty' -H 'Content-Type: application/json' -d'
 {
@@ -85,7 +86,7 @@ curl -XPUT 'localhost:9200/dandelion?pretty' -H 'Content-Type: application/json'
 '
 ```
 By doing so you create an index (named dandelion) that uses Dandelion analyzer ('dandelion-a') on the field "text" of documents of type "_doc" for both indexing and searching.\
-Of course, to make this code work, you have to replace the value of the field "auth" in dandelion_analyzer with your authorization token. Moreover, it is not necessary to define the parameter "lang", which is set to "auto" by default.
+Moreover, it is not necessary to define the parameter "lang", which is set to "auto" by default.
 
 #### Document insertion
 
