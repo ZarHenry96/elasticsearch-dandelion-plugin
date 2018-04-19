@@ -164,18 +164,21 @@ This is particularly useful if applied during indexing phase.
 
 ##### Example
 
-First of all define an index with different analyzers, one for indexing (with multilanguage option enabled) and one for searching (without multilanguage):
+First of all define an index ('dandelion_multilanguage') with different analyzers, one for indexing (with multilanguage option enabled) and one for searching (without multilanguage):
 ```bash
-curl -XPUT 'localhost:9200/dandelion?pretty' -H 'Content-Type: application/json' -d'          
+curl -XPUT 'localhost:9200/dandelion_multilanguage?pretty' -H 'Content-Type: application/json' -d'          
 {
    "settings":{                              
       "analysis":{
          "analyzer":{
             "dandelion_index_analyzer":{
-               "type": "dandelion-a","auth":"authorization token","multilang":"true"
+               "type": "dandelion-a",
+               "auth":"authorization token",
+               "multilang":"true"
             },
             "dandelion_search_analyzer":{
-               "type": "dandelion-a","auth":"authorization token"
+               "type": "dandelion-a",
+               "auth":"authorization token"
             }
          }
       }
@@ -198,7 +201,7 @@ curl -XPUT 'localhost:9200/dandelion?pretty' -H 'Content-Type: application/json'
 <br>After that insert a new document mentioning the Mona Lisa in italian:
 
 ```bash
-curl -XPUT 'http://localhost:9200/dandelion/_doc/gioconda' -H 'Content-Type: application/json' -d'
+curl -XPUT 'http://localhost:9200/dandelion_multilanguage/_doc/gioconda' -H 'Content-Type: application/json' -d'
 {
    "text":"La Gioconda, dipinta da Leonardo."  
 }                 
@@ -208,7 +211,7 @@ By doing so, the entities extracted (the "Mona Lisa" and "Leonardo da Vinci") ar
 
 <br>Now, if you run a query searching for "The Mona Lisa", thanks to the multilanguage option you will find the document you have just inserted:
 ```bash
-curl -XGET 'localhost:9200/dandelion/_search?pretty' -H 'Content-Type: application/json' -d'
+curl -XGET 'localhost:9200/dandelion_multilanguage/_search?pretty' -H 'Content-Type: application/json' -d'
 {
     "query": {
         "match" : {                                               
@@ -234,7 +237,7 @@ Here is the result:
     "max_score" : 0.4801315,
     "hits" : [
       {
-        "_index" : "dandelion",
+        "_index" : "dandelion_multilanguage",
         "_type" : "_doc",
         "_id" : "gioconda",
         "_score" : 0.4801315,
