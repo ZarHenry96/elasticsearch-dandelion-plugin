@@ -1,4 +1,4 @@
-# Dandelion plugin for Elasticsearch
+# Dandelion analysis plugin for Elasticsearch
 
 [![Download](resources/download.svg)](https://github.com/ZarHenry96/elasticsearch-dandelion-plugin/releases/download/v6.2.4/dandelion-6.2.4.zip)
 
