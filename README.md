@@ -263,7 +263,7 @@ The fastest is the one shown in quick start, which combines these two steps into
 
     * Alternatively, you can unzip it and place what you have extracted into elasticsearch's plugins folder.
 
-## Uninstall plugin
+## Uninstall
 
 If you want to uninstall Dandelion plugin, run this command from the elasticsearch root directory:
 ```bash
