@@ -258,7 +258,7 @@ The fastest is the one shown in quick start, which combines these two steps into
 1. To install Dandelion plugin you have first to compile or download it:
     * **Compile** <br> To compile the plugin, you have to run the command `./gradlew assemble` from the plugin root directory.\
     You will find the zip under the path `build/distributions`.\
-    NOTE: to compile it you need Gradle 4.6 and JVM 9; you can set the elasticsearch target version in gradle.properties.
+    NOTE: you can set the elasticsearch target version and the jdk version in gradle.properties.
 
     * **Download** <br> To download it, you can choose the desired version from here: [releases](https://github.com/ZarHenry96/elasticsearch-dandelion-plugin/releases).
 2. Once you have the zip, you have to install it:
