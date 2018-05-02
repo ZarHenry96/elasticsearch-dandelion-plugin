@@ -95,7 +95,7 @@ curl -XPUT 'localhost:9200/index_name?pretty' -H 'Content-Type: application/json
 ```
 To make this code work, you have to replace the value of the field "auth" in "dandelion_analyzer" with your authorization token, but **it's not recommended for elasticsearch instances that are not local**.
 
-**Eventually**, if you set both "dandelion.auth" in the keystore and "auth" in the index, the "auth" parameter defined in the index settings will have priority.
+Eventually, **if you set both "dandelion.auth" in the keystore and "auth" in the index, the "auth" parameter defined in the index settings will have priority**.
 
 ## Usage example
 
