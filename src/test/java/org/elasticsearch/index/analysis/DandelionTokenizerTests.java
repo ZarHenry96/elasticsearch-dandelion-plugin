@@ -114,7 +114,7 @@ public class DandelionTokenizerTests extends ESTestCase {
     @Test
     public void testTokenizerShouldThrowExceptionIfAuthTokenIsNotSpecified() throws IOException{
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("No authorization token (auth field) specified!");
+        thrown.expectMessage("No authorization token (auth) specified!");
 
         Tokenizer dandelionTokenizer = new DandelionTokenizer("","");
     }

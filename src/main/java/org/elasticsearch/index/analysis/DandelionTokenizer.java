@@ -46,7 +46,7 @@ public final class DandelionTokenizer extends Tokenizer {
     public DandelionTokenizer(String auth_token, String lang) {
         super();
         if(auth_token == null || auth_token.isEmpty()){
-            throw new IllegalArgumentException("No authorization token (auth field) specified!");
+            throw new IllegalArgumentException("No authorization token (auth) specified!");
         }else {
             this.auth_token = auth_token;
         }

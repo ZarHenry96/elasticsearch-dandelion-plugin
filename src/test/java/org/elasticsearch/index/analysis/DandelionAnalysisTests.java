@@ -9,7 +9,6 @@ import org.hamcrest.MatcherAssert;
 import org.junit.Before;
 
 import java.io.IOException;
-
 import static org.hamcrest.Matchers.instanceOf;
 
 public class DandelionAnalysisTests extends ESTestCase {
@@ -18,9 +17,10 @@ public class DandelionAnalysisTests extends ESTestCase {
 
     @Before
     public void setup() throws IOException {
-        Settings settings = Settings.builder().put("auth", "token").build();
-        this.analysis = createTestAnalysis(new Index("test", "_na_"), settings, new DandelionAnalysisPlugin());
+        Settings plugin_settings = Settings.builder().build();
+        Settings index_settings  = Settings.builder().build();
 
+        this.analysis = createTestAnalysis(new Index("test", "_na_"), index_settings, new DandelionAnalysisPlugin(plugin_settings));
     }
 
     public void testDandelionFactories() throws IOException {
